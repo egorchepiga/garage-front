@@ -1,9 +1,11 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import Row from '../components/row'
+import Log from '../components/log'
+import Construct from '../components/construct'
 import Button from '../components/button'
-import {getTable, editTable, insertRow, deleteRow, selectRow, editRequestAction} from '../store/containers/datagrip/action';
-
+import {getTable, editTable, insertRow, deleteRow, selectRow, editRequestAction, editFilter, left, right} from '../store/containers/datagrip/action';
+import '../styles/datagrip.css'
 class DataGrip extends Component {
 
     constructor(props) {
@@ -23,7 +25,7 @@ class DataGrip extends Component {
         let action = {
             action  : "INSERT",
             table   : this.props.store.datagrip.table,
-            id      : ++this.props.store.datagrip.maxId+""
+            id      : ++this.props.store.datagrip.maxId +""
         };
         this.props.insertRow(action);
     };
@@ -33,7 +35,7 @@ class DataGrip extends Component {
             action = {
             action  : "DELETE",
             table   : this.props.store.datagrip.table,
-            id      : this.props.store.datagrip.selected[0].id +"",
+            id      : this.props.store.datagrip.selected[0].id +""
         };
         this.props.deleteRow(action, rIndex);
     };
@@ -67,18 +69,57 @@ class DataGrip extends Component {
         this.props.editRequestAction(changedData, action)
     };
 
+    editFilter = (event) => {
+        this.props.editFilter({
+            column: event.target.getAttribute("column"),
+            value: event.target.value })
+    };
+
+    right = () => {
+        let index = 0,
+            showEnd = this.props.store.datagrip.showFrom + this.props.store.datagrip.showCount;
+        for (let i = this.props.store.datagrip.showFrom; i < this.props.store.datagrip.dbData.length && i < showEnd ; i++) {
+            let filtered = false,
+                filters = this.props.store.datagrip.filter;
+            for (let key in filters) {
+                if(this.props.store.datagrip.dbData[i][key].toString().indexOf(filters[key]) < 0)
+                    filtered = true;
+            }
+            if (!filtered)
+                index++;
+        }
+        if (index === this.props.store.datagrip.showCount)
+            this.props.right(showEnd)
+    };
+
+    left = () => {
+        let showFrom = this.props.store.datagrip.showFrom - this.props.store.datagrip.showCount;
+        if (showFrom < 0) showFrom = 0;
+        this.props.left(showFrom)
+    };
+
+
     fillGrip(dbData) {
-        let resArr = [];
-        for (let i = 0; i < dbData.length; i++) {
-            resArr.push(
-                <div className="row">
-                    <div className="col-md-2" onClick={this.selectRow} rIndex={i}>
-                        <label rIndex={i}>{i}</label>
+        let resArr = [],
+            index = 0,
+            showEnd = this.props.store.datagrip.showFrom + this.props.store.datagrip.showCount;
+        for (let i = this.props.store.datagrip.showFrom; i < dbData.length && i < showEnd ; i++) {
+            let filtered = false,
+                filters = this.props.store.datagrip.filter;
+            for (let key in filters) {
+                if(dbData[i][key].toString().indexOf(filters[key]) < 0)
+                    filtered = true;
+            }
+            if (!filtered)
+                resArr.push(
+                    <div className="row">
+                        <div className="index" onClick={this.selectRow} rIndex={i}>
+                            <label rIndex={i}>{++index}</label>
+                        </div>
+                        <Row class="elem" className="col-md-2 col-lg-2 col-xl-2 datagrip-row" data={dbData[i]} rIndex={i} table={this.props.store.datagrip.table}
+                             onChange={this.editRequestAction}/>
                     </div>
-                    <Row className="col-md-2" data={dbData[i]} rIndex={i} table={this.props.store.datagrip.table}
-                    onChange={this.editRequestAction}/>
-                </div>
-            )
+                )
         }
         return resArr
     }
@@ -87,8 +128,8 @@ class DataGrip extends Component {
         let resArr = [];
         for (let column in firstDbRow) {
             resArr.push(
-                <div className="col-md-2">
-                    <label>
+                <div className="col-md-2 col-lg-2 col-xl-2 elem header-elem">
+                    <label >
                         { column }
                     </label>
                 </div>
@@ -97,18 +138,40 @@ class DataGrip extends Component {
         return resArr
     }
 
+    fillFilters(firstDbRow) {
+        let resArr = [];
+        for (let column in firstDbRow) {
+            resArr.push(
+                <div className="col-md-2 col-lg-2 col-xl-2 datagrip-row">
+                    <input className="elem" column={column} placeholder={column} onChange={this.editFilter}/>
+                </div>
+            )
+        }
+        return resArr
+    }
+
     render() {
-        let dbData = this.props.store.datagrip.dbData;
+        let dbData = this.props.store.datagrip.dbData,
+            constructArray = this.props.store.datagrip.requestedActions.length > 0 ?
+                this.props.store.datagrip.requestedActions
+                : this.props.store.datagrip.lastRequestedActions;
         return (
             <div className="container">
                 <div className="row">
-                    <Button className="col-md-3" label="refresh" onClick={this.refresh}/>
-                    <Button className="col-md-3" label="push" onClick={this.push}/>
-                    <Button className="col-md-3" label="insert" onClick={this.insertRow}/>
-                    <Button className="col-md-3" label="delete" onClick={this.deleteRow}/>
+                    <Button className="array"  label="<" onClick={this.left}/>
+                    <Button className="array" label=">" onClick={this.right}/>
+                    <Button className="col-md-1" label="refresh" onClick={this.refresh}/>
+                    <Button className="col-md-1" label="push" onClick={this.push}/>
+                    <Button className="col-md-1" label="insert" onClick={this.insertRow}/>
+                    <Button className="col-md-1" label="delete" onClick={this.deleteRow}/>
+                </div>
+                <div className="row filters-row">
+                    <div className="index-poor">
+                    </div>
+                    { this.fillFilters(dbData[0]) }
                 </div>
                 <div className="row">
-                    <div className="col-md-2">
+                    <div className="index index-s">
                         <label>
                             #
                         </label>
@@ -117,6 +180,12 @@ class DataGrip extends Component {
                 </div>
                 <div>
                     { this.fillGrip(dbData) }
+                </div>
+                <div className="container">
+                    <div className="row">
+                        <Construct className="col-md-6" actions={constructArray} />
+                        <Log className="col-md-6" responses={this.props.store.datagrip.response} />
+                    </div>
                 </div>
             </div>
         )
@@ -143,6 +212,15 @@ export default connect(state => ({
     },
     editRequestAction : (changedData, reqAction) => {
         dispatch(editRequestAction(changedData, reqAction))
+    },
+    editFilter : (filter) => {
+        dispatch(editFilter(filter))
+    },
+    right : (showFrom) => {
+        dispatch(right(showFrom))
+    },
+    left : (showFrom) => {
+        dispatch(left(showFrom))
     }
     })
 )(DataGrip)

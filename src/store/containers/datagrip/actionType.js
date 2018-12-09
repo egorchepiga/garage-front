@@ -5,3 +5,7 @@ export const EDIT_DATA = "EDIT_DATA";
 export const INSERT = "INSERT";
 export const SELECT = "SELECT";
 export const DELETE = "DELETE";
+export const EDIT_FILTERS = "EDIT_FILTERS";
+export const LEFT = 'LEFT';
+export const RIGHT = 'RIGHT';
+export const CLEAN_UP = 'CLEAN_UP';

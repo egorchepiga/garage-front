@@ -14,6 +14,7 @@ export const getTable = (table) =>
                     return curr["Id"] > prev ? curr["Id"] : prev
                 }, 0);
 
+            dispatch({type: types.CLEAN_UP});
             dispatch({type: types.GET, payload: {
                     dbData: await json,
                     table: table,
@@ -32,11 +33,9 @@ export const editTable = (requestActions) =>
             method: "PUT",
             body: JSON.stringify(requestActions)
         }).then(async response => {
-            let payload = {
-                response : await response.json(),
-            };
-            console.log(await payload);
-            dispatch({type: types.PUT, payload: await payload});
+            let payload = await response.json();
+            console.log(await payload.answers);
+            dispatch({type: types.PUT, payload: await payload.answers});
         })
     };
 
@@ -63,3 +62,19 @@ export const selectRow = ({id, rIndex}) =>
     dispatch => {
         dispatch({type: types.SELECT, payload: [{id, rIndex }]});
     };
+
+export const editFilter = ({column, value}) =>
+    dispatch => {
+        dispatch({type: types.EDIT_FILTERS, payload: {column, value}});
+    };
+
+export const left = (showFrom) =>
+    dispatch => {
+        dispatch({type: types.LEFT, payload: showFrom});
+    };
+
+export const right = (showFrom) =>
+    dispatch => {
+        dispatch({type: types.RIGHT, payload: showFrom});
+    };
+

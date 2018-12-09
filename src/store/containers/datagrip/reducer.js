@@ -10,17 +10,30 @@ const initState = {
     response: [],
     requestedActions: [],
     lastRequestedActions: [],
-    filter: {
-        "": ""
-    }
+    filter: {},
+    showCount : 20,
+    showFrom : 0
 };
 
 export default function datagrip(state = initState, action) {
+
+    if (action.type === types.CLEAN_UP) {
+        return {...state, requestedActions: [], lastRequestedActions: [], response: []};
+    }
+
+    if (action.type === types.LEFT) {
+        return {...state, showFrom: action.payload};
+    }
+
+    if (action.type === types.RIGHT) {
+        return {...state, showFrom: action.payload};
+    }
+
     if (action.type === types.GET) {
         return {...state, table: action.payload.table, dbData: action.payload.dbData, maxId: action.payload.maxId};
     }
     if (action.type === types.PUT) {
-        return {...state, response: action.payload.response, requestedActions: [], lastRequestedActions: state.requestedActions};
+        return {...state, response: action.payload, requestedActions: [], lastRequestedActions: state.requestedActions};
     }
 
     if (action.type === types.INSERT) {
@@ -48,6 +61,18 @@ export default function datagrip(state = initState, action) {
         let dbData = state.dbData;
         dbData[action.payload.rIndex][action.payload.column] = action.payload.value;
         return {...state, dbData: dbData};
+    }
+
+    if (action.type === types.EDIT_FILTERS) {
+        let filters = state.filter;
+            for (let key in filters) {
+                if( key === action.payload.column) {
+                    filters[key] = action.payload.value;
+                    return {...state, filter: filters};
+                }
+            }
+            filters[action.payload.column] = action.payload.value;
+        return {...state, filter: filters};
     }
 
     if (action.type === types.EDIT_REQUEST) {
