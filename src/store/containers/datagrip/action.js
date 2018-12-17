@@ -23,6 +23,12 @@ export const getTable = (table) =>
         })
     };
 
+export const editDbData = (dbData) =>
+    dispatch => {
+        dispatch({type: types.CLEAN_UP});
+        dispatch({type: types.EDIT_DB_DATA, payload: dbData})
+    };
+
 export const editTable = (requestActions) =>
     dispatch => {
         fetch(`http://localhost:4000/edit`, {

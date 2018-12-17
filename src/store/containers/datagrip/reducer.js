@@ -17,6 +17,10 @@ const initState = {
 
 export default function datagrip(state = initState, action) {
 
+    if (action.type === types.EDIT_DB_DATA) {
+        return {...state, dbData: action.payload };
+    }
+
     if (action.type === types.CLEAN_UP) {
         return {...state, requestedActions: [], lastRequestedActions: [], response: []};
     }

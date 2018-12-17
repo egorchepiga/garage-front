@@ -4,14 +4,22 @@ import Row from '../components/row'
 import Log from '../components/log'
 import Construct from '../components/construct'
 import Button from '../components/button'
-import {getTable, editTable, insertRow, deleteRow, selectRow, editRequestAction, editFilter, left, right} from '../store/containers/datagrip/action';
+import Combobox from 'react-widgets/lib/Combobox'
+import {editDbData, getTable, editTable, insertRow, deleteRow, selectRow, editRequestAction, editFilter, left, right} from '../store/containers/datagrip/action';
 import '../styles/datagrip.css'
+import 'react-widgets/dist/css/react-widgets.css';
+
+
 class DataGrip extends Component {
 
     constructor(props) {
         super(props);
-        this.props.getTable("services");
+        this.props.getTable("masters");
     }
+
+    getTable = (value) => {
+        this.props.getTable(value);
+    };
 
     refresh = () => {
         this.props.getTable(this.props.store.datagrip.table);
@@ -151,19 +159,30 @@ class DataGrip extends Component {
     }
 
     render() {
-        let dbData = this.props.store.datagrip.dbData,
+        console.log(this.props.data);
+        let dbData = this.props.data || this.props.store.datagrip.dbData,
             constructArray = this.props.store.datagrip.requestedActions.length > 0 ?
                 this.props.store.datagrip.requestedActions
                 : this.props.store.datagrip.lastRequestedActions;
         return (
             <div className="container">
                 <div className="row">
-                    <Button className="array"  label="<" onClick={this.left}/>
-                    <Button className="array" label=">" onClick={this.right}/>
-                    <Button className="col-md-1" label="refresh" onClick={this.refresh}/>
-                    <Button className="col-md-1" label="push" onClick={this.push}/>
-                    <Button className="col-md-1" label="insert" onClick={this.insertRow}/>
-                    <Button className="col-md-1" label="delete" onClick={this.deleteRow}/>
+                    <Combobox
+                        onChange={this.getTable}
+                        dropDown
+                        data={[
+                            'masters',
+                            'services',
+                            'cars',
+                            'works'
+                        ]}
+                    />
+                    <Button className="array"  label="https://img.icons8.com/office/50/000000/left.png" onClick={this.left}/>
+                    <Button className="array" label="https://img.icons8.com/office/50/000000/right.png" onClick={this.right}/>
+                    <Button className="" label="https://img.icons8.com/dusk/50/000000/replay.png" onClick={this.refresh}/>
+                    { this.props.store.auth.auth && <Button className="" label="https://img.icons8.com/office/50/000000/upload.png" onClick={this.push}/> }
+                    { this.props.store.auth.auth && <Button className="" label="https://img.icons8.com/office/50/000000/edit-file.png" onClick={this.insertRow}/> }
+                    { this.props.store.auth.auth && <Button className="" label="https://img.icons8.com/office/16/000000/delete-row.png" onClick={this.deleteRow}/> }
                 </div>
                 <div className="row filters-row">
                     <div className="index-poor">
